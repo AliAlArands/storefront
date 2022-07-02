@@ -55,3 +55,23 @@ class Address (models.Model):
     city = models.CharField(max_length=255)
     customer = models.ForeignKey(
         Customer, on_delete=models.CASCADE)
+
+class Order (models.Model):
+    PENDEING_PAYMENT = 'P'
+    COMPLETE_PAYMENT = 'C'
+    FAILED_PAYMENT = 'F'
+    PAYMENT_STATUS = [
+        (PENDEING_PAYMENT, 'Pending'),
+        (COMPLETE_PAYMENT, 'Complete'),
+        (FAILED_PAYMENT, 'Failed'),
+    ]
+    placed_at = models.DateTimeField(auto_now_add=True)
+    payment_status = models.CharField(
+        max_length=1, choices=PAYMENT_STATUS, default=PENDEING_PAYMENT)
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity = models.PositiveSmallIntegerField()
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
