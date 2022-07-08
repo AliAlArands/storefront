@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "debug_toolbar",
+    'rest_framework',
     'core',
     'store',
 ]
@@ -87,7 +88,7 @@ DATABASES = {
         'NAME': 'storefront',
         'HOST': 'localhost',
         'USER': 'root',
-        'PASSWORD':'321alidar'
+        'PASSWORD': '321alidar'
     }
 }
 
