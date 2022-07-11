@@ -1,7 +1,7 @@
 from decimal import Decimal
 from numpy import source
 from rest_framework import serializers
-from .models import Product, Collection
+from .models import Product, Collection, Review
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -34,4 +34,15 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'title', 'description', 'price_with_tax',
-                  'price', 'collection' , 'inventory']
+                  'price', 'collection', 'inventory']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        product_id = self.context['product_id']
+        return Review.objects.create(product_id=product_id, **validated_data)
+
+    class Meta:
+        model = Review
+        fields = ['id', 'date', 'title', 'description']
