@@ -3,10 +3,11 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework import status
-from .models import Collection, Product, Review
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
+from .models import Cart, CartItem, Collection, Product, Review
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer
 # Create your views here.
 
 # mixins.ListModelMixins, mixins.CreateModelMixins, GenericAPIView
@@ -68,3 +69,29 @@ class CollectionList(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class CartViewSet(CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
+    queryset = Cart.objects.prefetch_related('items__product').all()
+    serializer_class = CartSerializer
+
+
+class CartItemViewSet(ModelViewSet):
+    def get_queryset(self):
+        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk']).select_related('product').all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddCartItemSerializer
+
+        if self.request.method == 'PUT':
+            return UpdateCartItemSerializer
+
+        return CartItemSerializer
+
+    def get_serializer_context(self):
+        if self.request.method == 'POST':
+            return {'cart_id': self.kwargs['cart_pk']}
+
+        elif self.request.method == 'PUT':
+            return {'cart_id': self.kwargs['cart_pk'], 'id': self.kwargs['pk']}
