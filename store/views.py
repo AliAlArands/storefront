@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.decorators import action
@@ -104,9 +105,14 @@ class CustomerViewSet (CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, G
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
     @action(detail=False, methods=['GET', 'PUT'])
     def me(self, request):
-        customer = Customer.objects.get(
+        (customer, created) = Customer.objects.get_or_create(
             user_id=request.user.id)
         if request.method == 'GET':
             serializer = CustomerSerializer(customer)
