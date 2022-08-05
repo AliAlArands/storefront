@@ -11,6 +11,7 @@ from rest_framework.decorators import action
 from rest_framework import status
 from .models import Cart, CartItem, Collection, Customer, Product, Review
 from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, CustomerSerializer
+from .permissions import IsAdminOrReadOnly
 # Create your views here.
 
 # mixins.ListModelMixins, mixins.CreateModelMixins, GenericAPIView
@@ -21,6 +22,7 @@ from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializ
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     def destroy(self, request, *args, **kwargs):
         product = get_object_or_404(Product, pk=self.kwargs['pk'])
@@ -43,6 +45,7 @@ class ReviewViewSet(ModelViewSet):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def collection_detail(request, pk):
+    permission_classes = [IsAdminOrReadOnly]
     collection = get_object_or_404(Collection, pk=pk)
     if request.method == 'GET':
         serializer = CollectionSerializer(collection)
@@ -62,6 +65,7 @@ def collection_detail(request, pk):
 
 
 class CollectionList(APIView):
+    permission_classes = [IsAdminOrReadOnly]
     def get(self, request):
         collections = Collection.objects.prefetch_related('product_set').all()
         serializer = CollectionSerializer(collections, many=True)
