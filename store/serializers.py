@@ -1,6 +1,6 @@
 from decimal import Decimal
 from rest_framework import serializers
-from .models import Cart, CartItem, Product, Collection, Review, Customer
+from .models import Cart, CartItem, Order, OrderItem, Product, Collection, Review, Customer
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -122,3 +122,19 @@ class CustomerSerializer (serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ['id', 'phone', 'birth_date', 'membership']
+
+
+class OrderItemSerialzer (serializers.ModelSerializer):
+    product = SimpleProuctSerializer()
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'quantity', 'unit_price']
+
+
+class OrderSerializer (serializers.ModelSerializer):
+    items = OrderItemSerialzer(many=True)
+
+    class Meta:
+        model = Order
+        fields = ['id', 'customer', 'payment_status', 'placed_at', 'items']

@@ -9,8 +9,8 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework import status
-from .models import Cart, CartItem, Collection, Customer, Product, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, CustomerSerializer
+from .models import Cart, CartItem, Collection, Customer, Order, Product, Review
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, OrderSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, CustomerSerializer
 from .permissions import IsAdminOrReadOnly
 # Create your views here.
 
@@ -66,6 +66,7 @@ def collection_detail(request, pk):
 
 class CollectionList(APIView):
     permission_classes = [IsAdminOrReadOnly]
+
     def get(self, request):
         collections = Collection.objects.prefetch_related('product_set').all()
         serializer = CollectionSerializer(collections, many=True)
@@ -127,3 +128,18 @@ class CustomerViewSet (CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, G
             serializer.save()
             return Response(serializer.data)
 
+
+class OrderViewSet (ModelViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # print(self.kwargs)
+        user = self.request.user
+        if user.is_staff:
+            return Order.objects.all()
+
+        (customer_id, created) = Customer.objects.only(
+            'id').get_or_create(user_id=user.id)
+        return Order.objects.filter(customer_id=customer_id)
+
+    serializer_class = OrderSerializer
