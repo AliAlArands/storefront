@@ -10,7 +10,7 @@ from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyM
 from rest_framework.decorators import action
 from rest_framework import status
 from .models import Cart, CartItem, Collection, Customer, Order, Product, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, OrderSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, CustomerSerializer
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CreateOrderSerializer, OrderSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, CustomerSerializer
 from .permissions import IsAdminOrReadOnly
 # Create your views here.
 
@@ -142,4 +142,11 @@ class OrderViewSet (ModelViewSet):
             'id').get_or_create(user_id=user.id)
         return Order.objects.filter(customer_id=customer_id)
 
-    serializer_class = OrderSerializer
+    # serializer_class = OrderSerializer
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateOrderSerializer
+        return OrderSerializer
+
+    def get_serializer_context(self):
+        return {'user_id': self.request.user.id}
