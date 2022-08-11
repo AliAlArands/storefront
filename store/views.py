@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.decorators import action
@@ -130,8 +130,11 @@ class CustomerViewSet (CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, G
 
 
 class OrderViewSet (ModelViewSet):
-    permission_classes = [IsAuthenticated]
 
+    def get_permissions(self):
+        if self.request.method in ['PATCH','DELETE']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
     def create(self, request, *args, **kwargs):
         serializer = CreateOrderSerializer(data=request.data, context={
                                            'user_id': self.request.user.id})
