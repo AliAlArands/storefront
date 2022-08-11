@@ -159,8 +159,8 @@ class CreateOrderSerializer (serializers.Serializer):
             items = CartItem.objects.select_related(
                 'product').filter(cart_id=cart_id)
 
-            (customer_id, created) = Customer.objects.only(
-                'id').get_or_create(user_id=user_id)
+            customer_id = Customer.objects.only(
+                'id').get(user_id=user_id)
 
             order = Order.objects.create(customer=customer_id)
 
