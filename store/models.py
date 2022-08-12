@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.conf import settings
@@ -35,6 +36,9 @@ class Product (models.Model):
     def __str__(self) -> str:
         return self.title
 
+class ProductImage (models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='store/images')
 
 class Customer(models.Model):
     MEMBERSHIP_BRONZE = 'B'

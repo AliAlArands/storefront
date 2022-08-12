@@ -9,8 +9,8 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework import status
-from .models import Cart, CartItem, Collection, Customer, Order, Product, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CreateOrderSerializer, OrderSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, CustomerSerializer, UpdateOrderSerializer
+from .models import Cart, CartItem, Collection, Customer, Order, Product, ProductImage, Review
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CreateOrderSerializer, OrderSerializer, ProductImageSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, CustomerSerializer, UpdateOrderSerializer
 from .permissions import IsAdminOrReadOnly
 # Create your views here.
 
@@ -20,7 +20,7 @@ from .permissions import IsAdminOrReadOnly
 
 
 class ProductViewSet(ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.prefetch_related('images').all()
     serializer_class = ProductSerializer
     permission_classes = [IsAdminOrReadOnly]
 
@@ -161,3 +161,16 @@ class OrderViewSet (ModelViewSet):
         elif self.request.method == 'PATCH':
             return UpdateOrderSerializer
         return OrderSerializer
+
+class ProductImageViewSet (ModelViewSet):
+    serializer_class = ProductImageSerializer
+
+    def get_serializer_context(self):
+        return {'product_id':self.kwargs['product_pk']}
+
+    def get_queryset(self):
+        print(self.kwargs)
+        return ProductImage.objects.filter(product_id=self.kwargs['product_pk'])
+        
+
+    
